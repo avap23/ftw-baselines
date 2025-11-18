@@ -46,6 +46,7 @@ class FTWDataModule(LightningDataModule):
         root: str = "data/ftw/",
         batch_size: int = 64,
         num_workers: int = 0,
+        self.pin_memory = torch.cuda.is_available()
         train_countries: list[str] = ["france"],
         val_countries: list[str] = ["france"],
         test_countries: list[str] = ["france"],
@@ -198,6 +199,7 @@ class FTWDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
             persistent_workers=True,
         )
 
@@ -207,6 +209,7 @@ class FTWDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
             persistent_workers=True,
         )
 
@@ -216,6 +219,7 @@ class FTWDataModule(LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
             persistent_workers=True,
         )
 
