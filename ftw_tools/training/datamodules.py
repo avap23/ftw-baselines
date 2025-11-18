@@ -46,7 +46,6 @@ class FTWDataModule(LightningDataModule):
         root: str = "data/ftw/",
         batch_size: int = 64,
         num_workers: int = 0,
-        self.pin_memory = torch.cuda.is_available()
         train_countries: list[str] = ["france"],
         val_countries: list[str] = ["france"],
         test_countries: list[str] = ["france"],
@@ -57,6 +56,7 @@ class FTWDataModule(LightningDataModule):
         brightness_aug: bool = False,
         preprocess_aug: bool = False,
         resize_aug: bool = False,
+        pin_memory: bool = False,
         **kwargs: Any,
     ) -> None:
         """Initialize a new FTWDataModule instance.
@@ -93,6 +93,7 @@ class FTWDataModule(LightningDataModule):
         self.temporal_options = temporal_options
         self.num_samples = num_samples
         self.ignore_sample_fn = kwargs.pop("ignore_sample_fn", None)
+        self.pin_memory = pin_memory
         self.kwargs = kwargs
         self.preprocess_aug = preprocess_aug
         if self.preprocess_aug and brightness_aug:
