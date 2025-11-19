@@ -465,14 +465,14 @@ class CustomSemanticSegmentationTask(BaseTask):
 
         loss: Tensor = self.criterion(y_hat, y)
 
-        self.log(
-            "train/loss",
-            loss,
-            on_step=False,
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
+        # self.log(
+        #     "train/loss",
+        #     loss,
+        #     on_step=False,
+        #     on_epoch=True,
+        #     prog_bar=True,
+        #     sync_dist=True,
+        # )
         self.train_metrics.update(y_hat, y)
         return loss
 
