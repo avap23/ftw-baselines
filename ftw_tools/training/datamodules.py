@@ -195,7 +195,6 @@ class FTWDataModule(LightningDataModule):
             )
 
     def train_dataloader(self) -> Any:
-        print(self.pin_memory)
         return DataLoader(
             dataset=self.train_dataset,
             batch_size=self.batch_size,
@@ -206,7 +205,6 @@ class FTWDataModule(LightningDataModule):
         )
 
     def val_dataloader(self) -> Any:
-        print(self.pin_memory)
         return DataLoader(
             dataset=self.val_dataset,
             batch_size=self.batch_size,
@@ -217,7 +215,6 @@ class FTWDataModule(LightningDataModule):
         )
 
     def test_dataloader(self) -> Any:
-        print(self.pin_memory)
         return DataLoader(
             dataset=self.test_dataset,
             batch_size=self.batch_size,
