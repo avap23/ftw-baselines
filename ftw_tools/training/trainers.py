@@ -523,14 +523,14 @@ class CustomSemanticSegmentationTask(BaseTask):
                     self.val_consensus_sum += cs
                     self.val_consensus_count += 1
 
-        # self.log(
-        #     "val/loss",
-        #     loss,
-        #     on_step=False,
-        #     on_epoch=True,
-        #     prog_bar=True,
-        #     sync_dist=True,
-        # )
+        self.log(
+            "val/loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
         self.val_metrics.update(y_hat, y)
         self.val_agg.update(y_hat, y)
 
@@ -552,21 +552,21 @@ class CustomSemanticSegmentationTask(BaseTask):
             fig: Optional[Figure] = None
             fig = datamodule.plot(sample)
 
-            if fig:
-                summary_writer = self.logger.experiment
-                summary_writer.add_figure(
-                    f"image/{batch_idx}", fig, global_step=self.global_step
-                )
-                plt.close()
+            # if fig:
+            #     summary_writer = self.logger.experiment
+            #     summary_writer.add_figure(
+            #         f"image/{batch_idx}", fig, global_step=self.global_step
+            #     )
+            #     plt.close()
 
-            if fig:
-                for logger in self.loggers:
-                    summary_writer = logger.experiment
-                    if hasattr(summary_writer, "add_figure"):
-                        summary_writer.add_figure(
-                            f"image/{batch_idx}", fig, global_step=self.global_step
-                        )
-                plt.close()
+            # if fig:
+            #     for logger in self.loggers:
+            #         summary_writer = logger.experiment
+            #         if hasattr(summary_writer, "add_figure"):
+            #             summary_writer.add_figure(
+            #                 f"image/{batch_idx}", fig, global_step=self.global_step
+            #             )
+            #     plt.close()
 
     def test_step(self, batch: Any, batch_idx: int, dataloader_idx: int = 0) -> None:
         """Compute the test loss and additional metrics.
