@@ -608,7 +608,7 @@ class CustomSemanticSegmentationTask(BaseTask):
     def on_train_epoch_start(self) -> None:
         lr = self.optimizers().param_groups[0]["lr"]
         #self.logger.experiment.add_scalar("lr", lr, self.current_epoch)
-        self.log("lr", lr, self.current_epoch)
+        self.log("lr", lr)
 
     def on_train_epoch_end(self):
         computed = self.train_metrics.compute()
