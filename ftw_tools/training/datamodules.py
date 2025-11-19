@@ -57,6 +57,7 @@ class FTWDataModule(LightningDataModule):
         preprocess_aug: bool = False,
         resize_aug: bool = False,
         pin_memory: bool = False,
+        prefetch_factor: Optional[int] = None,
         **kwargs: Any,
     ) -> None:
         """Initialize a new FTWDataModule instance.
@@ -94,6 +95,7 @@ class FTWDataModule(LightningDataModule):
         self.num_samples = num_samples
         self.ignore_sample_fn = kwargs.pop("ignore_sample_fn", None)
         self.pin_memory = pin_memory
+        self.prefetch_factor = prefetch_factor
         self.kwargs = kwargs
         self.preprocess_aug = preprocess_aug
         if self.preprocess_aug and brightness_aug:
@@ -202,6 +204,7 @@ class FTWDataModule(LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
             persistent_workers=True,
+            **({"prefetch_factor": self.prefetch_factor} if self.prefetch_factor is not None else {}),
         )
 
     def val_dataloader(self) -> Any:
@@ -212,6 +215,7 @@ class FTWDataModule(LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
             persistent_workers=True,
+            **({"prefetch_factor": self.prefetch_factor} if self.prefetch_factor is not None else {}),
         )
 
     def test_dataloader(self) -> Any:
@@ -222,6 +226,7 @@ class FTWDataModule(LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
             persistent_workers=True,
+            **({"prefetch_factor": self.prefetch_factor} if self.prefetch_factor is not None else {}),
         )
 
     def on_after_batch_transfer(self, batch: dict[str, Tensor], dataloader_idx: int):
