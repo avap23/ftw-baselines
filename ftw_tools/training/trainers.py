@@ -523,14 +523,14 @@ class CustomSemanticSegmentationTask(BaseTask):
                     self.val_consensus_sum += cs
                     self.val_consensus_count += 1
 
-        self.log(
-            "val/loss",
-            loss,
-            on_step=False,
-            on_epoch=True,
-            prog_bar=True,
-            sync_dist=True,
-        )
+        # self.log(
+        #     "val/loss",
+        #     loss,
+        #     on_step=False,
+        #     on_epoch=True,
+        #     prog_bar=True,
+        #     sync_dist=True,
+        # )
         self.val_metrics.update(y_hat, y)
         self.val_agg.update(y_hat, y)
 
