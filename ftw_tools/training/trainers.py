@@ -308,7 +308,23 @@ class CustomSemanticSegmentationTask(BaseTask):
             },
             prefix="val/",
         )
-
+        self.train_agg = MetricCollection(
+            {
+                "precision_macro": MulticlassPrecision(
+                    num_classes, average="macro", ignore_index=ignore_index
+                ),
+                "recall_macro": MulticlassRecall(
+                    num_classes, average="macro", ignore_index=ignore_index
+                ),
+                "iou_macro": MulticlassJaccardIndex(
+                    num_classes, average="macro", ignore_index=ignore_index
+                ),
+                "iou_micro": MulticlassJaccardIndex(
+                    num_classes, average="micro", ignore_index=ignore_index
+                ),
+            },
+            prefix="train/",
+        )
         self.val_tps = 0
         self.val_fps = 0
         self.val_fns = 0
@@ -477,6 +493,7 @@ class CustomSemanticSegmentationTask(BaseTask):
             sync_dist=True,
         )
         self.train_metrics.update(y_hat, y)
+        self.train_agg.update(y_hat, y)
         return loss
 
     def validation_step(
@@ -620,6 +637,7 @@ class CustomSemanticSegmentationTask(BaseTask):
         ######################
         train_loss = self.trainer.callback_metrics.get("train/loss_epoch", None)
         agg = self.train_agg.compute()
+        self.train_agg.reset()
         iou_vec = computed["train/iou"]
         field_iou = float(iou_vec[1])
         boundary_iou = float(iou_vec[2])
