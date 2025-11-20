@@ -700,7 +700,7 @@ class CustomSemanticSegmentationTask(BaseTask):
         per_class = self.val_metrics.compute()
         self._log_per_class(per_class, "val")
         ##############################
-        train_loss = self.trainer.callback_metrics.get("val/loss_epoch", None)
+        val_loss = self.trainer.callback_metrics.get("val/loss_epoch", None)
         agg = self.val_agg.compute()
         self.val_agg.reset()
         iou_vec = per_class["val/iou"]
@@ -713,7 +713,7 @@ class CustomSemanticSegmentationTask(BaseTask):
 
         print(
             f"\nEpoch {self.current_epoch} "
-            f"| Val Loss: {train_loss:.4f} "
+            f"| Val Loss: {val_loss:.4f} "
             f"| Val Micro IoU: {iou_micro:.4f} "
             f"| Val Macro IoU: {iou_macro:.4f} "
             f"| Val Interior IoU: {field_iou:.4f} "
