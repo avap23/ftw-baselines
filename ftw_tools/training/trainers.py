@@ -651,9 +651,9 @@ class CustomSemanticSegmentationTask(BaseTask):
             f"| Train Loss: {train_loss:.4f} "
             f"| Train Micro IoU: {iou_micro:.4f} "
             f"| Train Macro IoU: {iou_macro:.4f} "
-            f"| Interior IoU: {field_iou:.4f} "
-            f"| Boundary IoU: {boundary_iou:.4f} "
-            f"| Interior Recall: {field_recall:.4f} "
+            f"| Train Interior IoU: {field_iou:.4f} "
+            f"| Train Boundary IoU: {boundary_iou:.4f} "
+            f"| Train Interior Recall: {field_recall:.4f} "
             # f"| Train Interior IoU: {metrics['train_InteriorClassJaccardIndex']:.4f}"
             # f"| Train Recall: {metrics['train_InteriorClassRecall']:.4f} "
         )
