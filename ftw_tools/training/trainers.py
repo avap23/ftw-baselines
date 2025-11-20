@@ -726,7 +726,7 @@ class CustomSemanticSegmentationTask(BaseTask):
         self.val_metrics.reset()
 
         # log aggregates (single scalars)
-        agg = self.val_agg.compute()
+        #agg = self.val_agg.compute()
         self.log_dict(agg, on_step=False, on_epoch=True, sync_dist=True)
         self.val_agg.reset()
 
