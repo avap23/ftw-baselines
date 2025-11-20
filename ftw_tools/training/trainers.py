@@ -445,7 +445,7 @@ class CustomSemanticSegmentationTask(BaseTask):
             # values is shape [C]
             for i, v in enumerate(values):
                 cname = self.class_names[i]
-                if cname == "field":
+                if cname == "field" or cname == "boundary":
                     self.log(
                         f"{name}/{cname}",
                         v,
