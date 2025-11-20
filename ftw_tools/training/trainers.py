@@ -657,6 +657,7 @@ class CustomSemanticSegmentationTask(BaseTask):
             # f"| Train Interior IoU: {metrics['train_InteriorClassJaccardIndex']:.4f}"
             # f"| Train Recall: {metrics['train_InteriorClassRecall']:.4f} "
         )
+        self.log("train/iou_macro", agg["train/iou_macro"], on_epoch=True)
         ############################
         self.train_metrics.reset()
 
