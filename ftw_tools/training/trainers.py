@@ -723,6 +723,16 @@ class CustomSemanticSegmentationTask(BaseTask):
             # f"| Train Interior IoU: {metrics['train_InteriorClassJaccardIndex']:.4f}"
             # f"| Train Recall: {metrics['train_InteriorClassRecall']:.4f} "
         )
+
+        if val_loss is not None:
+            self.log(
+                "val_loss",
+                val_loss,
+                on_step=False,
+                on_epoch=True,
+                prog_bar=False,
+                sync_dist=True,
+            )
         ###############
         self.val_metrics.reset()
 
