@@ -302,6 +302,9 @@ class CustomSemanticSegmentationTask(BaseTask):
                 "iou_macro": MulticlassJaccardIndex(
                     num_classes, average="macro", ignore_index=ignore_index
                 ),
+                "iou_micro": MulticlassJaccardIndex(
+                    num_classes, average="micro", ignore_index=ignore_index
+                ),
             },
             prefix="val/",
         )
@@ -613,6 +616,30 @@ class CustomSemanticSegmentationTask(BaseTask):
     def on_train_epoch_end(self):
         computed = self.train_metrics.compute()
         self._log_per_class(computed, "train")
+
+        ######################
+        train_loss = self.trainer.callback_metrics.get("train/loss_epoch", None)
+        agg = self.train_agg.compute()
+        iou_vec = computed["train/iou"]
+        field_iou = float(iou_vec[1])
+        boundary_iou = float(iou_vec[2])
+        iou_macro = float(agg["train/iou_macro"])   
+        iou_micro = float(agg["train/iou_micro"])  
+        recall_vec = computed["train/recall"]
+        field_recall = float(recall_vec[1])
+
+        print(
+            f"\nEpoch {self.current_epoch} "
+            f"| Train Loss: {train_loss:.4f} "
+            f"| Train Micro IoU: {iou_micro:.4f} "
+            f"| Train Macro IoU: {iou_macro:.4f} "
+            f"| Interior IoU: {field_iou:.4f} "
+            f"| Boundary IoU: {boundary_iou:.4f} "
+            f"| Interior Recall: {field_recall:.4f} "
+            # f"| Train Interior IoU: {metrics['train_InteriorClassJaccardIndex']:.4f}"
+            # f"| Train Recall: {metrics['train_InteriorClassRecall']:.4f} "
+        )
+        ############################
         self.train_metrics.reset()
 
     def on_validation_epoch_end(self) -> None:
