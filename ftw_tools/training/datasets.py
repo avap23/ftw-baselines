@@ -580,8 +580,10 @@ class FTW_finaltraining(FTW):
         hkl_path = file_name["hkl"]
 
         sample = hkl.load(hkl_path)   # ← returns dict: {"image": ..., "mask": ...}
+        sample["mask"] = sample["mask"].long()
 
         if self.transforms is not None:
             sample = self.transforms(sample)
+            sample["mask"] = sample["mask"].long()
 
         return sample
