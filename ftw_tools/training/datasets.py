@@ -1,5 +1,5 @@
 """FTW dataset."""
-
+import hickle as hkl
 import os
 import random
 from pathlib import Path
@@ -387,3 +387,184 @@ class FTW(NonGeoDataset):
             plt.suptitle(suptitle)
 
         return fig
+
+
+
+
+
+
+
+
+
+#################################################################################
+### In your actual training run you want to have a different dataset that actually
+# indexes your tensors instead of your list -> tiff -> numpy -> tensor
+
+class FTW_finaltraining(FTW):
+	# self.filenames = # point to your new directory with the te4nsors
+
+    def __init__(
+        self,
+        root: str = "data/ftw",
+        countries: Sequence[str] | str | None = None,
+        split: str = "train",
+        transforms: Optional[Callable[[dict[str, Any]], dict[str, Any]]] = None,
+        checksum: bool = False,
+        load_boundaries: bool = False,
+        load_edges: bool = False,
+        temporal_options: str = "stacked",
+        swap_order: bool = False,
+        num_samples: int = -1,
+        ignore_sample_fn: Optional[str] = None,
+        verbose: bool = True,
+    ) -> None:
+        """Initialize a new FTW dataset instance.
+
+        Args:
+            root: root directory where dataset can be found, this should contain the
+                country folder
+            countries: the countries to load the dataset from, e.g. "france"
+            split: string specifying what split to load (e.g. "train", "val", "test")
+            transforms: a function/transform that takes input sample and its target as
+                entry and returns a transformed version
+            checksum: if True, check the MD5 of the downloaded files (may be slow)
+            load_boundaries: if True, load the 3 class masks with boundaries
+            load_edges: if True, load the edge masks
+            temporal_options : for ablation study, valid option are (stacked, windowA,
+                windowB, median, rgb, random_window)
+            swap_order: if True, swap the order of temporal data (i.e. use window A first)
+            ignore_sample_fn: path to a filename with a list of samples to ignore
+        Raises:
+            AssertionError: if ``countries`` argument is invalid
+            AssertionError: if ``split`` argument is invalid
+            RuntimeError: if data is not found, or checksums don't match
+        """
+        self.root = root
+
+        if countries is None:
+            raise ValueError("Please specify the countries to load the dataset from")
+
+        if temporal_options not in TEMPORAL_OPTIONS:
+            raise ValueError(f"Invalid temporal option {temporal_options}")
+
+        if isinstance(countries, str):
+            countries = [countries]
+        countries = [country.lower() for country in countries]
+        for country in countries:
+            assert country in ALL_COUNTRIES, f"Invalid country {country}"
+
+        self.countries = countries
+        assert split in self.valid_splits
+        self.transforms = transforms
+        self.checksum = checksum
+        self.load_boundaries = load_boundaries
+        self.load_edges = load_edges
+        self.temporal_options = temporal_options
+        self.num_samples = num_samples
+
+        if swap_order:
+            if temporal_options not in ("stacked", "rgb"):
+                raise ValueError(
+                    "Can only use swap_order with temporal_options stacked or rgb"
+                )
+        self.swap_order = swap_order
+
+        if verbose:
+            if self.load_boundaries:
+                print("Loading 3 Class Masks, with Boundaries")
+            else:
+                print("Loading 2 Class Masks, without Boundaries")
+            print("Temporal option: ", temporal_options)
+            if swap_order:
+                print("Using window A first, then window B")
+            else:
+                print("Using window B first, then window A")
+            if self.load_edges:
+                print("Loading edge masks")
+
+        if not self._check_integrity():
+            raise RuntimeError(
+                "Dataset not found at root directory or corrupted.  Download dataset with `ftw data download`"
+            )
+
+        if checksum:
+            assert self._checksum(), "Checksum of dataset does not match"
+
+        self.filenames = []
+        all_filenames = []
+
+        bad_samples = set()
+        if ignore_sample_fn is not None:
+            with open(ignore_sample_fn, "r") as f:
+                lines = f.readlines()
+                for line in lines:
+                    country, sample_idx = line.split(",")
+                    bad_samples.add((country, sample_idx.strip()))
+            if verbose:
+                print(f"Ignoring samples: {len(bad_samples)}")
+
+        for country in self.countries:
+            country_root: str = os.path.join(self.root, country)
+            chips_fn = os.path.join(country_root, f"chips_{country}.parquet")
+            chips_df = gpd.read_parquet(str(chips_fn))
+            chips_df = chips_df[chips_df["split"] == split]
+            aoi_ids = chips_df["aoi_id"].values
+
+            for idx in aoi_ids:
+                if (country, idx) in bad_samples:
+                    continue
+                #### MODIFY THIS CODE TO ONLY RETURN PATH TO the HKL file
+                hkl_path = Path(
+                    os.path.join(country_root, "hkl", f"{idx}.hkl")
+                )
+                if not hkl_path.exists():
+                    raise ValueError(f"Missing hkl file: {hkl_path}")
+
+                all_filenames.append({"hkl": str(hkl_path)})
+                
+
+                # if self.load_edges and not edge_fn.exists():
+                #     raise ValueError(
+                #         "ERROR: Missing edge files! Run ./scripts/add_edges_to_dataset.py"
+                #     )
+
+                # if self.load_boundaries:
+                #     mask_fn = masks_3c_fn
+                # else:
+                #     mask_fn = masks_2c_fn
+            
+                # file_record = {
+                # 	"hkl": str(hkl_path)
+                # }
+                # if self.load_edges:
+                #     file_record["edge"] = str(edge_fn)
+                # all_filenames.append(file_record)
+
+        if self.num_samples == -1:  # select all samples
+            self.filenames = all_filenames
+        else:
+            self.filenames = random.sample(
+                all_filenames, min(self.num_samples, len(all_filenames))
+            )
+
+        if verbose:
+            print(f"Selecting: {len(self.filenames)} samples")
+
+    def __getitem__(self, index: int) -> dict[str, Tensor]:
+        """Return an index within the dataset.
+
+        Args:
+            index: index to return
+
+        Returns:
+            dictionary containing "image" and "mask" PyTorch tensors
+        """
+        file_name = self.filenames[index]
+        hkl_path = file_name["hkl"]
+
+        sample = hkl.load(hkl_path)   # ← returns dict: {"image": ..., "mask": ...}
+
+        if self.transforms is not None:
+            sample = self.transforms(sample)
+
+        return sample
