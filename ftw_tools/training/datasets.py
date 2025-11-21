@@ -57,7 +57,6 @@ class FTW(NonGeoDataset):
             AssertionError: if ``split`` argument is invalid
             RuntimeError: if data is not found, or checksums don't match
         """
-        print("\n\n\n\nUsing parent class ")
         self.root = root
 
         if countries is None:
@@ -440,7 +439,6 @@ class FTW_finaltraining(FTW):
             AssertionError: if ``split`` argument is invalid
             RuntimeError: if data is not found, or checksums don't match
         """
-        print("\n\n\n\nUsing subclass \n\n")
         self.root = root
 
         if countries is None:

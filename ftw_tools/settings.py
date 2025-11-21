@@ -23,6 +23,7 @@ SUPPORTED_POLY_FORMATS_TXT = (
 
 # List of all available countries
 ALL_COUNTRIES = [
+    "acre",
     "altoparana_training",
     "altoparana_validation",
     "austria",
