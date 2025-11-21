@@ -552,6 +552,23 @@ class FTW_finaltraining(FTW):
         if verbose:
             print(f"Selecting: {len(self.filenames)} samples")
 
+
+    def _check_integrity(self) -> bool:
+        """Check that HKL files exist for the selected countries."""
+        for country in self.countries:
+            country_root = os.path.join(self.root, country)
+            hkl_dir = os.path.join(country_root, "hkl")
+            if not os.path.exists(hkl_dir):
+                print(f"Country {country} is missing hkl directory: {hkl_dir}")
+                return False
+
+            hkl_files = list(Path(hkl_dir).glob("*.hkl"))
+            if len(hkl_files) == 0:
+                print(f"No hkl files found in {hkl_dir}")
+                return False
+
+        return True
+    
     def __getitem__(self, index: int) -> dict[str, Tensor]:
         """Return an index within the dataset.
 
