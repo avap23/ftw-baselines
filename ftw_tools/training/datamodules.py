@@ -12,7 +12,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader, Subset
 
 from ftw_tools.training.datasets import FTW
-
+from ftw_tools.training.datasets import FTW_finaltraining
 
 def preprocess(sample):
     sample["image"] = sample["image"] / 3000
@@ -167,7 +167,7 @@ class FTWDataModule(LightningDataModule):
 
     def setup(self, stage: str):
         if stage in ["fit"]:
-            self.train_dataset = FTW(
+            self.train_dataset = FTW_finaltraining(
                 root=self.root,
                 countries=self.train_countries,
                 split="train",
@@ -178,7 +178,7 @@ class FTWDataModule(LightningDataModule):
                 **self.kwargs,
             )
         if stage in ["fit", "validate"]:
-            self.val_dataset = FTW(
+            self.val_dataset = FTW_finaltraining(
                 root=self.root,
                 countries=self.val_countries,
                 split="val",
@@ -187,7 +187,7 @@ class FTWDataModule(LightningDataModule):
                 num_samples=self.num_samples,
             )
         if stage == "test":
-            self.test_dataset = FTW(
+            self.test_dataset = FTW_finaltraining(
                 root=self.root,
                 countries=self.test_countries,
                 split="test",
@@ -246,3 +246,4 @@ class FTWDataModule(LightningDataModule):
             if hasattr(dataset, "plot"):
                 fig = dataset.plot(*args, **kwargs)
         return fig
+
