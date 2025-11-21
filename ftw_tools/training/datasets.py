@@ -580,7 +580,9 @@ class FTW_finaltraining(FTW):
         hkl_path = file_name["hkl"]
 
         sample = hkl.load(hkl_path)   # ← returns dict: {"image": ..., "mask": ...}
-        sample["mask"] = sample["mask"].long()
+        # Convert image and mask to PyTorch tensors
+        sample["image"] = torch.from_numpy(sample["image"]).float()   # keep image as float
+        sample["mask"] = torch.from_numpy(sample["mask"]).long()      # mask must be long for CrossEntropyLoss
 
         if self.transforms is not None:
             sample = self.transforms(sample)
