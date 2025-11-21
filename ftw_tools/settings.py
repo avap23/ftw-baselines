@@ -43,6 +43,7 @@ ALL_COUNTRIES = [
     "lithuania",
     "luxembourg",
     "netherlands",
+    "pampas",
     "peruvianamazon_training",
     "peruvianamazon_validation",
     "portugal",
