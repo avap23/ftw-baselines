@@ -270,30 +270,61 @@ class CustomSemanticSegmentationTask(BaseTask):
                 tversky_gamma=1.33,
                 ignore_index=ignore_index,
             )
+        # elif loss == "customtversky":
+        #     per_class = self.hparams.get("per_class_tversky", False)
+        #     if per_class:
+        #         class_weights = self.hparams.get("class_weights", [0.33,0.34,0.33])
+        #         alphas = self.hparams.get("alphas", [0.5,0.5,0.5])
+        #         betas = self.hparams.get("betas", [0.5,0.5,0.5])
+
+        #         # create per-class loss objects
+        #         loss0 = smp.losses.TverskyLoss("multiclass", classes=[0], ignore_index=ignore_index, alpha=alphas[0], beta=betas[0])
+        #         loss1 = smp.losses.TverskyLoss("multiclass", classes=[1], ignore_index=ignore_index, alpha=alphas[1], beta=betas[1])
+        #         loss2 = smp.losses.TverskyLoss("multiclass", classes=[2], ignore_index=ignore_index, alpha=alphas[2], beta=betas[2])
+                
+        #         # combine them 
+        #         self.criterion = lambda outputs, targets: (
+        #             class_weights[0]*loss0(outputs, targets) +
+        #             class_weights[1]*loss1(outputs, targets) +
+        #             class_weights[2]*loss2(outputs, targets)
+        #         )
+        #     else: # this version is for if you don't specify class weights
+        #         alpha = self.hparams.get("alpha", 0.5)
+        #         beta = self.hparams.get("beta", 0.5)
+        #         self.criterion = smp.losses.TverskyLoss(
+        #             "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
+        #         )
         elif loss == "customtversky":
             per_class = self.hparams.get("per_class_tversky", False)
-            if per_class:
-                class_weights = self.hparams.get("class_weights", [0.33,0.34,0.33])
-                alphas = self.hparams.get("alphas", [0.5,0.5,0.5])
-                betas = self.hparams.get("betas", [0.5,0.5,0.5])
+            ignore_index = self.hparams.get("ignore_index", None)
+            class_weights = self.hparams.get("class_weights", [0.33, 0.34, 0.33])
+            alphas = self.hparams.get("alphas", [0.5, 0.5, 0.5])
+            betas = self.hparams.get("betas", [0.5, 0.5, 0.5])
 
+            if per_class:
                 # create per-class loss objects
-                loss0 = smp.losses.TverskyLoss("multiclass", classes=[0], ignore_index=ignore_index, alpha=alphas[0], beta=betas[0])
-                loss1 = smp.losses.TverskyLoss("multiclass", classes=[1], ignore_index=ignore_index, alpha=alphas[1], beta=betas[1])
-                loss2 = smp.losses.TverskyLoss("multiclass", classes=[2], ignore_index=ignore_index, alpha=alphas[2], beta=betas[2])
-                
-                # combine them 
-                self.criterion = lambda outputs, targets: (
-                    class_weights[0]*loss0(outputs, targets) +
-                    class_weights[1]*loss1(outputs, targets) +
-                    class_weights[2]*loss2(outputs, targets)
+                loss_objs = [
+                    smp.losses.TverskyLoss(
+                        mode="multiclass",
+                        classes=None,  # None for all classes
+                        alpha=alphas[i],
+                        beta=betas[i],
+                        ignore_index=ignore_index,
+                    )
+                    for i in range(len(class_weights))
+                ]
+                # combine them into a single loss
+                self.criterion = lambda outputs, targets: sum(
+                    class_weights[i] * loss_objs[i](outputs, targets)
+                    for i in range(len(class_weights))
                 )
-            else: # this version is for if you don't specify class weights
+            else:
                 alpha = self.hparams.get("alpha", 0.5)
                 beta = self.hparams.get("beta", 0.5)
                 self.criterion = smp.losses.TverskyLoss(
-                    "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
+                    mode="multiclass", alpha=alpha, beta=beta, ignore_index=ignore_index
                 )
+
         else:
             raise ValueError(
                 f"Loss type '{loss}' is not valid. "
