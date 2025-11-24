@@ -315,6 +315,7 @@ class CustomSemanticSegmentationTask(BaseTask):
         #             "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
         #         )
         else:
+            print("inside else statement")
             raise ValueError(
                 f"Loss type '{loss}' is not valid. "
                 "Currently supported: 'ce', 'pixel_weighted_ce', 'jaccard', "
