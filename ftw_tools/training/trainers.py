@@ -66,6 +66,13 @@ class CustomSemanticSegmentationTask(BaseTask):
         freeze_backbone: bool = False,
         freeze_decoder: bool = False,
         edge_agreement_loss: bool = False,
+
+        alpha: Optional[float] = 0.5,
+        beta: Optional[float] = 0.5,
+        per_class_tversky: Optional[bool] = False,
+        alphas: Optional[list[float]] = None,
+        betas: Optional[list[float]] = None,
+
         model_kwargs: dict[Any, Any] = dict(),
     ) -> None:
         """Initialize a new SemanticSegmentationTask instance.
@@ -263,12 +270,36 @@ class CustomSemanticSegmentationTask(BaseTask):
                 tversky_gamma=1.33,
                 ignore_index=ignore_index,
             )
+        elif loss == "customtversky":
+            per_class = self.hparams.get("per_class_tversky", False)
+            if per_class:
+                class_weights = self.hparams.get("class_weights", [0.33,0.34,0.33])
+                alphas = self.hparams.get("alphas", [0.5,0.5,0.5])
+                betas = self.hparams.get("betas", [0.5,0.5,0.5])
+
+                # create per-class loss objects
+                loss0 = smp.losses.TverskyLoss("multiclass", classes=[0], ignore_index=ignore_index, alpha=alphas[0], beta=betas[0])
+                loss1 = smp.losses.TverskyLoss("multiclass", classes=[1], ignore_index=ignore_index, alpha=alphas[1], beta=betas[1])
+                loss2 = smp.losses.TverskyLoss("multiclass", classes=[2], ignore_index=ignore_index, alpha=alphas[2], beta=betas[2])
+                
+                # combine them 
+                self.criterion = lambda outputs, targets: (
+                    class_weights[0]*loss0(outputs, targets) +
+                    class_weights[1]*loss1(outputs, targets) +
+                    class_weights[2]*loss2(outputs, targets)
+                )
+            else: # this version is for if you don't specify class weights
+                alpha = self.hparams.get("alpha", 0.5)
+                beta = self.hparams.get("beta", 0.5)
+                self.criterion = smp.losses.TverskyLoss(
+                    "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
+                )
         else:
             raise ValueError(
                 f"Loss type '{loss}' is not valid. "
                 "Currently supported: 'ce', 'pixel_weighted_ce', 'jaccard', "
                 "'focal', 'dice', 'ce+dice', 'logcoshdice', 'ftnmt', "
-                "'ce+ftnmt', 'localtversky', or 'tversky_ce'."
+                "'ce+ftnmt', 'localtversky', 'customtversky' or 'tversky_ce'."
             )
 
     def configure_metrics(self) -> None:
