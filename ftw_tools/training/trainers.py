@@ -243,6 +243,7 @@ class CustomSemanticSegmentationTask(BaseTask):
             )
 
         elif loss == "ftnmt":
+            print("inside ftnmt_loss")
             self.criterion = FtnmtLoss(
                 num_classes=self.hparams["num_classes"],
                 loss_depth=self.hparams.get("loss_depth", 5),
@@ -252,6 +253,7 @@ class CustomSemanticSegmentationTask(BaseTask):
             )
 
         elif loss == "ce+ftnmt":
+            print("inside ce+ ftnmt_loss")
             # ce_weight = self.ce_weight
             # ftnmt_weight = self.ftnmt_weight
             ce_weight = getattr(self, "ce_weight", 0.5)
