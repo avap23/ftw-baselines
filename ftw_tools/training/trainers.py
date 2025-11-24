@@ -137,6 +137,17 @@ class CustomSemanticSegmentationTask(BaseTask):
         self.weights = weights
         self.edge_agreement_loss = edge_agreement_loss
         super().__init__()
+        if alphas is None:
+            alphas = [0.5] * num_classes
+        if betas is None:
+            betas = [0.5] * num_classes
+        
+        self.alphas = alphas
+        self.betas = betas
+
+        # self.alpha = alpha
+        # self.beta=beta
+        self.save_hyperparameters()
 
     def configure_losses(self) -> None:
         """Initialize the loss criterion.
