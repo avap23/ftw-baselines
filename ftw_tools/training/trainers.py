@@ -270,6 +270,13 @@ class CustomSemanticSegmentationTask(BaseTask):
                 tversky_gamma=1.33,
                 ignore_index=ignore_index,
             )
+        elif loss == "customtversky":
+            alpha = 0.5
+            beta = 0.5
+            print("inside customtversky")
+            self.criterion = smp.losses.TverskyLoss(
+                "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
+            )
         # elif loss == "customtversky":
         #     per_class = self.hparams.get("per_class_tversky", False)
         #     if per_class:
@@ -294,37 +301,6 @@ class CustomSemanticSegmentationTask(BaseTask):
         #         self.criterion = smp.losses.TverskyLoss(
         #             "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
         #         )
-        elif loss == "customtversky":
-            per_class = self.hparams.get("per_class_tversky", False)
-            ignore_index = self.hparams.get("ignore_index", None)
-            class_weights = self.hparams.get("class_weights", [0.33, 0.34, 0.33])
-            alphas = self.hparams.get("alphas", [0.5, 0.5, 0.5])
-            betas = self.hparams.get("betas", [0.5, 0.5, 0.5])
-
-            if per_class:
-                # create per-class loss objects
-                loss_objs = [
-                    smp.losses.TverskyLoss(
-                        mode="multiclass",
-                        classes=None,  # None for all classes
-                        alpha=alphas[i],
-                        beta=betas[i],
-                        ignore_index=ignore_index,
-                    )
-                    for i in range(len(class_weights))
-                ]
-                # combine them into a single loss
-                self.criterion = lambda outputs, targets: sum(
-                    class_weights[i] * loss_objs[i](outputs, targets)
-                    for i in range(len(class_weights))
-                )
-            else:
-                alpha = self.hparams.get("alpha", 0.5)
-                beta = self.hparams.get("beta", 0.5)
-                self.criterion = smp.losses.TverskyLoss(
-                    mode="multiclass", alpha=alpha, beta=beta, ignore_index=ignore_index
-                )
-
         else:
             raise ValueError(
                 f"Loss type '{loss}' is not valid. "
