@@ -285,14 +285,14 @@ class CustomSemanticSegmentationTask(BaseTask):
                 tversky_gamma=1.33,
                 ignore_index=ignore_index,
             )
-        elif loss == "customtversky":
-            self.criterion = TverskyFocalCELoss(
-                loss_weight=class_weights,
-                tversky_weight=self.hparams.get("tversky_weight", 0.5),
-                tversky_smooth=1,
-                tversky_alpha=0.7,
-                tversky_gamma=1.33,
-                ignore_index=ignore_index,
+        elif loss == "x":
+            if self.hparams["class_weights"] is not None:
+                class_weights = torch.tensor(self.hparams["class_weights"])
+            else:
+                class_weights = None
+            ignore_value = -1000 if ignore_index is None else ignore_index
+            self.criterion = nn.CrossEntropyLoss(
+                ignore_index=ignore_value, weight=class_weights
             )
         # elif loss == "customtversky":
         #     per_class = self.hparams.get("per_class_tversky", False)
