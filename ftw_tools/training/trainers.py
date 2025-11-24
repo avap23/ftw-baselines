@@ -67,11 +67,11 @@ class CustomSemanticSegmentationTask(BaseTask):
         freeze_decoder: bool = False,
         edge_agreement_loss: bool = False,
 
-        alpha: Optional[float] = 0.5,
-        beta: Optional[float] = 0.5,
+        # alpha: Optional[float] = 0.5,
+        # beta: Optional[float] = 0.5,
         per_class_tversky: Optional[bool] = False,
-        alphas: Optional[list[float]] = None,
-        betas: Optional[list[float]] = None,
+        # alphas: Optional[list[float]] = None,
+        # betas: Optional[list[float]] = None,
 
         model_kwargs: dict[Any, Any] = dict(),
     ) -> None:
@@ -137,19 +137,19 @@ class CustomSemanticSegmentationTask(BaseTask):
         self.weights = weights
         self.edge_agreement_loss = edge_agreement_loss
         super().__init__()
-        self.alpha=alpha
-        self.beta=beta
-        if alphas is None:
-            alphas = [0.5] * num_classes
-        if betas is None:
-            betas = [0.5] * num_classes
+        # self.alpha=alpha
+        # self.beta=beta
+        # if alphas is None:
+        #     alphas = [0.5] * num_classes
+        # if betas is None:
+        #     betas = [0.5] * num_classes
         
-        self.alphas = alphas
-        self.betas = betas
+        # self.alphas = alphas
+        # self.betas = betas
 
         # self.alpha = alpha
         # self.beta=beta
-        self.save_hyperparameters()
+        # self.save_hyperparameters()
 
     def configure_losses(self) -> None:
         """Initialize the loss criterion.
