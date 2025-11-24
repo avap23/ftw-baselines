@@ -286,11 +286,17 @@ class CustomSemanticSegmentationTask(BaseTask):
                 ignore_index=ignore_index,
             )
         elif loss == "customtversky":
+            print("inside customtversky")
+            # Dynamically get number of classes from checkpoint if needed
+            num_classes = 3 # self.hparams.get("num_classes", 3)  # fallback to 3
             alpha = 0.5
             beta = 0.5
-            print("inside customtversky")
             self.criterion = smp.losses.TverskyLoss(
-                "multiclass", classes=None, ignore_index=ignore_index, alpha = alpha, beta = beta
+                mode="multiclass",
+                classes=list(range(num_classes)),  # dynamically generate class indices
+                ignore_index=ignore_index,
+                alpha=alpha,
+                beta=beta,
             )
         # elif loss == "customtversky":
         #     per_class = self.hparams.get("per_class_tversky", False)
