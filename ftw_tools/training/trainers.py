@@ -137,6 +137,8 @@ class CustomSemanticSegmentationTask(BaseTask):
         self.weights = weights
         self.edge_agreement_loss = edge_agreement_loss
         super().__init__()
+        self.alpha=alpha
+        self.beta=beta
         if alphas is None:
             alphas = [0.5] * num_classes
         if betas is None:
