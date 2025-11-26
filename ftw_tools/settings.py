@@ -25,6 +25,8 @@ SUPPORTED_POLY_FORMATS_TXT = (
 ALL_COUNTRIES = [
     "altoparana_training",
     "altoparana_validation",
+    "araucaria_training",
+    "araucaria_validation",
     "austria",
     "belgium",
     "brazil",
@@ -42,6 +44,8 @@ ALL_COUNTRIES = [
     "latvia",
     "lithuania",
     "luxembourg",
+    "maparaguay_training",
+    "maparaguay_validation",
     "netherlands",
     "peruvianamazon_training",
     "peruvianamazon_validation",
@@ -52,6 +56,8 @@ ALL_COUNTRIES = [
     "south_africa",
     "spain",
     "sweden",
+    "uruguayansavannah_training",
+    "uruguayansavannah_validation",
     "vietnam",
 ]
 
